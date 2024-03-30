@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use super::components::*;
 use crate::projectile::systems::*;
 
-const X_LIMIT: f32 = 850.0;
+const X_LIMIT: f32 = 900.0;
 const Y_POSITION: f32 = -450.0;
 const TIME_BETWEEN_SHOOT: f32 = 0.4;
 const PLAYER_SPEED: f32 = 400.0;

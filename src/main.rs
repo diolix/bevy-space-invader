@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+mod ennemy;
 mod player;
 mod projectile;
 
@@ -15,6 +16,7 @@ fn main() {
             }),
             player::PlayerPlugin,
             projectile::ProjectilePlugin,
+            ennemy::EnnemyPlugin,
         ))
         .add_systems(Startup, setup_camera)
         .run();

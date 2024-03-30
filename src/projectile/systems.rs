@@ -3,6 +3,7 @@ use bevy::prelude::*;
 
 const Y_LIMIT: f32 = 600.0;
 const PLAYER_PROJECTILE_SPEED: f32 = 600.0;
+const Z_VALUE: f32 = -1.0;
 
 pub fn shoot_player_projectile_helper(
     commands: &mut Commands,
@@ -12,7 +13,7 @@ pub fn shoot_player_projectile_helper(
     commands.spawn((
         SpriteBundle {
             texture: asset_server.load("PNG/Lasers/laserBlue03.png"),
-            transform: Transform::from_translation(position),
+            transform: Transform::from_xyz(position.x, position.y, Z_VALUE),
             ..default()
         },
         Projectile {
@@ -30,7 +31,6 @@ pub fn move_projectiles(
     for (mut transform, projectile, entity) in query_projectile.iter_mut() {
         if transform.translation.y < -Y_LIMIT || transform.translation.y > Y_LIMIT {
             commands.entity(entity).despawn();
-            println!("despawned projectile");
             continue;
         }
         match projectile.direction {
