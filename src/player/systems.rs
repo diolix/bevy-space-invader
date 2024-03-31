@@ -3,12 +3,13 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use super::components::*;
-use crate::projectile::{components::Collider, systems::*};
+use crate::projectile::components::{Collider, Projectile, ProjectileType};
 
 const X_LIMIT: f32 = 900.0;
 const Y_POSITION: f32 = -450.0;
 const TIME_BETWEEN_SHOOT: f32 = 0.4;
 const PLAYER_SPEED: f32 = 400.0;
+const Z_VALUE_PROJECTILE: f32 = -1.0;
 
 pub fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
@@ -74,5 +75,23 @@ pub fn shoot_projectile(
         .shoot_timer
         .set_duration(Duration::from_secs_f32(TIME_BETWEEN_SHOOT));
     player.shoot_timer.reset();
-    shoot_player_projectile_helper(&mut commands, &asset_server, player_transform.translation);
+
+    commands.spawn((
+        SpriteBundle {
+            texture: asset_server.load("PNG/Lasers/laserBlue03.png"),
+            transform: Transform::from_xyz(
+                player_transform.translation.x,
+                player_transform.translation.y,
+                Z_VALUE_PROJECTILE,
+            ),
+            ..default()
+        },
+        Projectile {
+            projectile_type: ProjectileType::Player,
+        },
+        Collider {
+            widht: 30.0,
+            height: 70.0,
+        },
+    ));
 }

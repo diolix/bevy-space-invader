@@ -8,28 +8,6 @@ use bevy::prelude::*;
 const Y_LIMIT: f32 = 600.0;
 const PLAYER_PROJECTILE_SPEED: f32 = 600.0;
 const ENNEMY_PROJECTILE_SPEED: f32 = 600.0;
-const Z_VALUE: f32 = -1.0;
-
-pub fn shoot_player_projectile_helper(
-    commands: &mut Commands,
-    asset_server: &AssetServer,
-    position: Vec3,
-) {
-    commands.spawn((
-        SpriteBundle {
-            texture: asset_server.load("PNG/Lasers/laserBlue03.png"),
-            transform: Transform::from_xyz(position.x, position.y, Z_VALUE),
-            ..default()
-        },
-        Projectile {
-            projectile_type: ProjectileType::Player,
-        },
-        Collider {
-            widht: 30.0,
-            height: 70.0,
-        },
-    ));
-}
 
 pub fn move_projectiles(
     mut commands: Commands,

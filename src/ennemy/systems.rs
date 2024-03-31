@@ -5,12 +5,12 @@ use crate::projectile::{components::Collider, events::ProjectileHitEnnemy};
 use super::components::{EnnemiesDirection, EnnemiesManager, Ennemy};
 
 const Y_POSITION: f32 = 480.0;
-const COLUMNS: u32 = 4;
+const COLUMNS: u32 = 11;
 const ROWS: u32 = 4;
 const SPACE_BETWEEN_COLUMNS: u32 = 130;
 const SPACE_BETWEEN_ROWS: u32 = 100;
 
-const ENNEMIES_SPEED: f32 = 100.0;
+const ENNEMIES_SPEED: f32 = 40.0;
 
 //width resolution / 2
 const X_LIMIT: f32 = 960.0;
