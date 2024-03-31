@@ -1,14 +1,16 @@
 use bevy::prelude::*;
 
+use crate::projectile::{components::Collider, events::ProjectileHitEnnemy};
+
 use super::components::{EnnemiesDirection, EnnemiesManager, Ennemy};
 
 const Y_POSITION: f32 = 480.0;
-const COLUMNS: u32 = 11;
+const COLUMNS: u32 = 4;
 const ROWS: u32 = 4;
-const SPACE_BETWEEN_COLUMNS: u32 = 120;
+const SPACE_BETWEEN_COLUMNS: u32 = 130;
 const SPACE_BETWEEN_ROWS: u32 = 100;
 
-const ENNEMIES_SPEED: f32 = 40.0;
+const ENNEMIES_SPEED: f32 = 100.0;
 
 //width resolution / 2
 const X_LIMIT: f32 = 960.0;
@@ -52,6 +54,10 @@ pub fn spawn_ennemies(mut commands: Commands, asset_server: Res<AssetServer>) {
                         row_index,
                         column_index,
                     },
+                    Collider {
+                        widht: 100.0,
+                        height: 100.0,
+                    },
                 ))
                 .set_parent(ennemies_manager);
         }
@@ -79,20 +85,18 @@ pub fn move_ennemies(
 
     match ennemies_manager.direction {
         EnnemiesDirection::Left => {
-            let ennemies_width = (max_colum - min_column + 1) * SPACE_BETWEEN_COLUMNS;
             transform.translation.x -= (ennemies_manager.count_down_movements + 1) as f32
                 * ENNEMIES_SPEED
                 * time.delta_seconds();
-            if transform.translation.x - (ennemies_width as f32) / 2.0 < -X_LIMIT {
+            if check_touch_bound(transform.translation.x, max_colum, min_column) {
                 handle_down_transition(&mut ennemies_manager, &transform, EnnemiesDirection::Right);
             }
         }
         EnnemiesDirection::Right => {
-            let ennemies_width = (max_colum - min_column + 1) * SPACE_BETWEEN_COLUMNS;
             transform.translation.x += (ennemies_manager.count_down_movements + 1) as f32
                 * ENNEMIES_SPEED
                 * time.delta_seconds();
-            if transform.translation.x + (ennemies_width as f32) / 2.0 > X_LIMIT {
+            if check_touch_bound(transform.translation.x, max_colum, min_column) {
                 handle_down_transition(&mut ennemies_manager, &transform, EnnemiesDirection::Left);
             }
         }
@@ -112,6 +116,13 @@ pub fn move_ennemies(
     }
 }
 
+fn check_touch_bound(translation_x: f32, max_colum: u32, min_column: u32) -> bool {
+    let half_ennemies_width = ((max_colum - min_column + 1) * SPACE_BETWEEN_COLUMNS) as f32 / 2.0;
+    let center = translation_x + (min_column as f32 * SPACE_BETWEEN_COLUMNS as f32 / 2.0)
+        - ((COLUMNS - max_colum - 1) as f32 * SPACE_BETWEEN_COLUMNS as f32 / 2.0);
+    center + half_ennemies_width > X_LIMIT || center - half_ennemies_width < -X_LIMIT
+}
+
 fn handle_down_transition(
     ennemies_manager: &mut EnnemiesManager,
     transform: &Transform,
@@ -124,4 +135,11 @@ fn handle_down_transition(
     }
     ennemies_manager.direction = EnnemiesDirection::Down;
     ennemies_manager.count_down_movements += 1;
+}
+
+pub fn on_hit(mut event_reader: EventReader<ProjectileHitEnnemy>, mut commands: Commands) {
+    for ev in event_reader.read() {
+        println!("ennemy hit !");
+        commands.entity(ev.ennemy).despawn();
+    }
 }

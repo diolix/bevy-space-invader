@@ -3,7 +3,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use super::components::*;
-use crate::projectile::systems::*;
+use crate::projectile::{components::Collider, systems::*};
 
 const X_LIMIT: f32 = 900.0;
 const Y_POSITION: f32 = -450.0;
@@ -20,6 +20,10 @@ pub fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
         Player {
             speed: PLAYER_SPEED,
             shoot_timer: Timer::from_seconds(0.1, TimerMode::Once),
+        },
+        Collider {
+            widht: 100.0,
+            height: 100.0,
         },
     ));
 }

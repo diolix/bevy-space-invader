@@ -2,11 +2,17 @@ use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct Projectile {
-    pub speed: f32,
-    pub direction: ProjectileDirection,
+    pub projectile_type: ProjectileType,
 }
 
-pub enum ProjectileDirection {
-    Up,
-    _Down,
+#[derive(Component)]
+pub struct Collider {
+    pub widht: f32,
+    pub height: f32,
+}
+
+#[derive(PartialEq)]
+pub enum ProjectileType {
+    Ennemy,
+    Player,
 }
