@@ -10,7 +10,7 @@ use crate::projectile::{
 
 use super::components::{EnnemiesDirection, EnnemiesManager, Ennemy};
 
-const Y_POSITION: f32 = 480.0;
+const Y_POSITION: f32 = 440.0;
 const COLUMNS: u32 = 11;
 const ROWS: u32 = 4;
 const SPACE_BETWEEN_COLUMNS: u32 = 130;

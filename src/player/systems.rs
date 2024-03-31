@@ -2,16 +2,25 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use super::components::*;
-use crate::projectile::components::{Collider, Projectile, ProjectileType};
+use super::{components::*, resources::HpSprites};
+use crate::projectile::{
+    components::{Collider, Projectile, ProjectileType},
+    events::ProjectileHitPlayer,
+};
 
 const X_LIMIT: f32 = 900.0;
 const Y_POSITION: f32 = -450.0;
 const TIME_BETWEEN_SHOOT: f32 = 0.4;
 const PLAYER_SPEED: f32 = 400.0;
 const Z_VALUE_PROJECTILE: f32 = -1.0;
+const HP_SPRITE_INITIAL_POSITION: Vec3 = Vec3::new(900.0, 500.0, 1.0);
+const HP_SPRITE_SPACE_BETWEEN: f32 = 50.0;
 
-pub fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup_player(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut hp_sprites_resource: ResMut<HpSprites>,
+) {
     commands.spawn((
         SpriteBundle {
             texture: asset_server.load("PNG/playerShip3_blue.png"),
@@ -27,6 +36,22 @@ pub fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
             height: 100.0,
         },
     ));
+
+    let mut vec_hp_sprites: Vec<Entity> = Vec::new();
+    for i in 0..3 {
+        let mut pos = HP_SPRITE_INITIAL_POSITION;
+        pos.x -= i as f32 * HP_SPRITE_SPACE_BETWEEN;
+        vec_hp_sprites.push(
+            commands
+                .spawn(SpriteBundle {
+                    texture: asset_server.load("PNG/UI/playerLife3_blue.png"),
+                    transform: Transform::from_translation(pos),
+                    ..default()
+                })
+                .id(),
+        );
+    }
+    hp_sprites_resource.sprites_entity = vec_hp_sprites;
 }
 
 pub fn move_player(
@@ -94,4 +119,18 @@ pub fn shoot_projectile(
             height: 70.0,
         },
     ));
+}
+
+pub fn on_hit(
+    mut commands: Commands,
+    event_reader: EventReader<ProjectileHitPlayer>,
+    mut hp_res: ResMut<HpSprites>,
+) {
+    if event_reader.is_empty() || hp_res.sprites_entity.is_empty() {
+        return;
+    }
+
+    println!("player hit");
+    let sprite = hp_res.sprites_entity.remove(0);
+    commands.entity(sprite).despawn();
 }
