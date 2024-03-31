@@ -9,6 +9,6 @@ pub struct EnnemyPlugin;
 impl Plugin for EnnemyPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_ennemies)
-            .add_systems(Update, (move_ennemies, on_hit));
+            .add_systems(Update, (move_ennemies, shoot_projectile, on_hit));
     }
 }

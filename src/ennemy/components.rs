@@ -12,6 +12,7 @@ pub struct EnnemiesManager {
     pub direction: EnnemiesDirection,
     pub previous_y_position: f32,
     pub count_down_movements: u32,
+    pub shoot_timer: Timer,
 }
 
 pub enum EnnemiesDirection {

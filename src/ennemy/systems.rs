@@ -1,6 +1,12 @@
-use bevy::prelude::*;
+use std::time::Duration;
 
-use crate::projectile::{components::Collider, events::ProjectileHitEnnemy};
+use bevy::prelude::*;
+use rand::seq::IteratorRandom;
+
+use crate::projectile::{
+    components::{Collider, Projectile, ProjectileType},
+    events::ProjectileHitEnnemy,
+};
 
 use super::components::{EnnemiesDirection, EnnemiesManager, Ennemy};
 
@@ -11,6 +17,8 @@ const SPACE_BETWEEN_COLUMNS: u32 = 130;
 const SPACE_BETWEEN_ROWS: u32 = 100;
 
 const ENNEMIES_SPEED: f32 = 40.0;
+const BASE_SHOOT_CADENCE: f32 = 2.0;
+const ACCELERATION_SHOOT_CADENCE: f32 = 0.2;
 
 //width resolution / 2
 const X_LIMIT: f32 = 960.0;
@@ -25,6 +33,7 @@ pub fn spawn_ennemies(mut commands: Commands, asset_server: Res<AssetServer>) {
                 direction: EnnemiesDirection::Right,
                 previous_y_position: 0.0,
                 count_down_movements: 0,
+                shoot_timer: Timer::from_seconds(BASE_SHOOT_CADENCE, TimerMode::Once),
             },
             SpatialBundle {
                 visibility: Visibility::Visible,
@@ -139,7 +148,65 @@ fn handle_down_transition(
 
 pub fn on_hit(mut event_reader: EventReader<ProjectileHitEnnemy>, mut commands: Commands) {
     for ev in event_reader.read() {
-        println!("ennemy hit !");
         commands.entity(ev.ennemy).despawn();
     }
+}
+
+pub fn shoot_projectile(
+    time: Res<Time>,
+    asset_server: Res<AssetServer>,
+    mut commands: Commands,
+    mut ennemies_manager_query: Query<&mut EnnemiesManager>,
+    ennemies_transform_query: Query<&GlobalTransform, With<Ennemy>>,
+) {
+    let mut ennemies_manager = match ennemies_manager_query.get_single_mut() {
+        Ok(ok) => ok,
+        Err(error) => {
+            print!("ennemies_manager, error getting EnnemiesManager component : {error}");
+            return;
+        }
+    };
+
+    ennemies_manager.shoot_timer.tick(time.delta());
+
+    if !ennemies_manager.shoot_timer.finished() {
+        return;
+    }
+
+    //source : https://stackoverflow.com/questions/34215280/how-can-i-randomly-select-one-element-from-a-vector-or-array
+    let spawn_position = match ennemies_transform_query
+        .iter()
+        .choose(&mut rand::thread_rng())
+    {
+        Some(ok) => ok,
+        None => {
+            return;
+        }
+    };
+
+    let duration = BASE_SHOOT_CADENCE
+        - (ACCELERATION_SHOOT_CADENCE * ennemies_manager.count_down_movements as f32);
+    ennemies_manager
+        .shoot_timer
+        .set_duration(Duration::from_secs_f32(duration));
+    ennemies_manager.shoot_timer.reset();
+
+    commands.spawn((
+        SpriteBundle {
+            texture: asset_server.load("PNG/Lasers/laserRed03.png"),
+            transform: Transform::from_xyz(
+                spawn_position.translation().x,
+                spawn_position.translation().y,
+                -1.0,
+            ),
+            ..default()
+        },
+        Projectile {
+            projectile_type: ProjectileType::Ennemy,
+        },
+        Collider {
+            widht: 30.0,
+            height: 70.0,
+        },
+    ));
 }
